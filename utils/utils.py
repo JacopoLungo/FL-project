@@ -20,3 +20,8 @@ class MeanReduction:
     def __call__(self, x, target):
         x = x[target != 255]
         return x.mean()
+
+def unNormalize(self, tensorImage, mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]):
+        for t, m, s in zip(tensorImage, mean, std):
+            t.mul_(s).add_(m)
+        return tensorImage
