@@ -1,0 +1,24 @@
+#the program to run
+program: centralized.py
+
+#method 
+method : random
+
+#metric to optimize
+metric:
+    name: miou
+    goal: maximize
+  
+#parameters space to search
+parameters:
+  lr:
+    distribution: log_uniform_values
+    min: 1e-4
+    max: 1e-2
+  
+  batch_size:
+    values: [4,8,16]
+
+  optmizer: ['adam', 'sgd']
+
+
