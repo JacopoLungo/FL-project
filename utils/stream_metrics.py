@@ -59,7 +59,10 @@ class StreamSegMetrics(Metrics):
 
     def __init__(self, n_classes, name):
         super().__init__(n_classes=n_classes, name=name)
-
+    """
+    Restituisce una confusion matrix sottoforma di array.
+    Sulla diagonale c'è il numero totale di pixel classificati correttamente
+    """
     def _fast_hist(self, label_true, label_pred):
         mask = (label_true >= 0) & (label_true < self.n_classes)
         hist = np.bincount(
@@ -69,6 +72,10 @@ class StreamSegMetrics(Metrics):
         return hist
 
     def update(self, label_trues, label_preds):
+        """
+        Funzione per aggiornare la confusion matrix alla fine di ogni batch
+        input: label_trues = label_preds devono avere shape (batchSize, 512, 928)
+        """
         for lt, lp in zip(label_trues, label_preds):
             self.confusion_matrix += self._fast_hist(lt.flatten(), lp.flatten())
         self.total_samples += len(label_trues)
@@ -78,18 +85,18 @@ class StreamSegMetrics(Metrics):
         eps = 1e-6
         hist = self.confusion_matrix
 
-        gt_sum = hist.sum(axis=1)
+        gt_sum = hist.sum(axis=1) #n. tot. pixel per ogni classe ground truth 
         mask = (gt_sum != 0)
-        diag = np.diag(hist)
+        diag = np.diag(hist) #array con n. tot pixel correttamente predetti
 
-        acc = diag.sum() / hist.sum()
-        acc_cls_c = diag / (gt_sum + eps)
-        acc_cls = np.mean(acc_cls_c[mask])
+        acc = diag.sum() / hist.sum() #pxl correttamente predetti / pxl totali
+        acc_cls_c = diag / (gt_sum + eps) #corr. pred / n. pxl tot. per ogni classe (recall)
+        acc_cls = np.mean(acc_cls_c[mask]) #accuracy media (esclude le classi che non compaiono)
         precision_cls_c = diag / (hist.sum(axis=0) + eps)
         precision_cls = np.mean(precision_cls_c)
-        iu = diag / (gt_sum + hist.sum(axis=0) - diag + eps)
+        iu = diag / (gt_sum + hist.sum(axis=0) - diag + eps)#interesection / union
         mean_iu = np.mean(iu[mask])
-        freq = hist.sum(axis=1) / hist.sum()
+        freq = hist.sum(axis=1) / hist.sum() #n. tot pxl per ogni classe(true) / n tot pxl
         fwavacc = (freq[freq > 0] * iu[freq > 0]).sum()
 
         cls_iu = dict(zip(range(self.n_classes), [iu[i] if m else "X" for i, m in enumerate(mask)]))

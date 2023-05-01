@@ -32,7 +32,7 @@ def set_seed(random_seed):
 
 
 def get_dataset_num_classes(dataset):
-    if dataset == 'idda':
+    if dataset == 'idda' or dataset == 'iddaCB':
         return 16
     if dataset == 'femnist':
         return 62
@@ -100,22 +100,33 @@ def get_datasets(args):
     train_datasets = []
     train_transforms, test_transforms = get_transforms(args)
 
-    if args.dataset == 'idda':
+    if args.dataset == 'idda' or args.dataset == 'iddaCB':
         root = 'data/idda'
-        with open(os.path.join(root, 'train.json'), 'r') as f:
-            all_data = json.load(f)
-        for client_id in all_data.keys():
-            train_datasets.append(IDDADataset(root=root, list_samples=all_data[client_id], transform=train_transforms,
-                                              client_name=client_id))
+        if args.dataset == 'idda':
+            with open(os.path.join(root, 'train.json'), 'r') as f:
+                all_data = json.load(f)
+            for client_id in all_data.keys():
+                train_datasets.append(IDDADataset(root=root, list_samples=all_data[client_id], transform=train_transforms,
+                                                client_name=client_id))
+        
+        elif args.dataset == 'iddaCB':
+            with open(os.path.join(root, 'train.txt'), 'r') as f:
+                train_data = f.read().splitlines()
+                train_datasets.append(IDDADataset(root=root, list_samples=train_data, transform=train_transforms,
+                                                    client_name="Unique"))
+            
+            
         with open(os.path.join(root, 'test_same_dom.txt'), 'r') as f:
             test_same_dom_data = f.read().splitlines()
             test_same_dom_dataset = IDDADataset(root=root, list_samples=test_same_dom_data, transform=test_transforms,
                                                 client_name='test_same_dom')
+            
         with open(os.path.join(root, 'test_diff_dom.txt'), 'r') as f:
             test_diff_dom_data = f.read().splitlines()
             test_diff_dom_dataset = IDDADataset(root=root, list_samples=test_diff_dom_data, transform=test_transforms,
                                                 client_name='test_diff_dom')
         test_datasets = [test_same_dom_dataset, test_diff_dom_dataset]
+
 
     elif args.dataset == 'femnist':
         niid = args.niid
