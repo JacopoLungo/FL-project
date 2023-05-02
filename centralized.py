@@ -248,10 +248,12 @@ class Centralized:
         :param int ix: index of the image in self.dataset
         :param float alpha: transparency index
         """
-        img = self.dataset[ix][0].cuda()
-        outputLogit = self.model(img.view(1, 3, 512, 928))['out'][0]
-        prediction = outputLogit.argmax(0)
-        label2color = Label2Color(idda_16_cmap())
-        pred_mask = label2color(prediction.cpu()).astype(np.uint8)
-        plt.imshow(unNormalize(img.cpu()).permute(1,2,0))
-        plt.imshow(pred_mask, alpha = alpha)
+        self.model.eval()
+        with torch.no_grad():
+            img = self.dataset[ix][0].cuda()
+            outputLogit = self.model(img.view(1, 3, 512, 928))['out'][0]
+            prediction = outputLogit.argmax(0)
+            label2color = Label2Color(idda_16_cmap())
+            pred_mask = label2color(prediction.cpu()).astype(np.uint8)
+            plt.imshow(unNormalize(img.cpu()).permute(1,2,0))
+            plt.imshow(pred_mask, alpha = alpha)
