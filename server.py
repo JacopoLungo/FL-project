@@ -9,11 +9,13 @@ class Server:
 
     def __init__(self, args, train_clients, test_clients, model, metrics):
         self.args = args
-        self.train_clients = train_clients
-        self.test_clients = test_clients
-        self.model = model
+        self.train_clients = train_clients #lista con un solo elemento (istanza della classe centralized (test_client = False))
+        self.test_clients = test_clients #lista con due elementi (istanza della classe centralized (test_client = True))
+        self.model = model #da passare poi al client
         self.metrics = metrics
         self.model_params_dict = copy.deepcopy(self.model.state_dict())
+        #per setting centralized
+        self.params = None
 
     def select_clients(self):
         num_clients = min(self.args.clients_per_round, len(self.train_clients))
@@ -25,11 +27,14 @@ class Server:
             :param clients: list of all the clients to train
             :return: model updates gathered from the clients, to be aggregated
         """
+        """
+        Fa il train sul trainClient (train.txt)
+        """
         updates = []
         for i, c in enumerate(clients):
             # TODO: missing code here!
             raise NotImplementedError
-        return updates
+        return updates #nel setting centralized restituisce direttamente i pesi
 
     def aggregate(self, updates):
         """
@@ -44,7 +49,22 @@ class Server:
         """
         This method orchestrates the training the evals and tests at rounds level
         """
+        """
+        Train chiama train_round(), salva il modello restituito da train_round(),
+        chiama eval_train (train.txt) che fa l'evaluation sul train client e test()
+        che fa l'evaluation su entrambi i test clients (test_same_dom e test_diff_dom)
+        """
         for r in range(self.args.num_rounds):
+            #
+            self.parmas = self.train_round(self.train_clients[0])
+            state_dict  = torch.load('modelliSalvati/checkpoint.pth')
+            self.model.classifier.load_state_dict(state_dict)
+
+            self.eval_train()
+            self.test()
+
+
+
             # TODO: missing code here!
             raise NotImplementedError
 
