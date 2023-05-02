@@ -60,12 +60,15 @@ class IDDADataset(VisionDataset):
     def __len__(self) -> int:
         return len(self.list_samples)
         
+    #! non utilizzare questo unNormalize (chiamalo dalla cartella utils)
     def unNormalize(self, tensorImage, mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]):
         for t, m, s in zip(tensorImage, mean, std):
             t.mul_(s).add_(m)
         return tensorImage
     
-    #TODO: chiamare unNormalized da utils e toglierlo da qui 
+    #TODO: chiamare unNormalized da utils e toglierlo da qui
+    #! funzione da rimuovere. Puoi stampare le immagini le label e le predizioni
+    #! in un metodo del client  
     def showImgAndLable(self, index):
         image, label = self.__getitem__(index)
         #unnormalize to show
