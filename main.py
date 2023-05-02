@@ -13,6 +13,7 @@ import datasets.np_transforms as nptr
 
 from torch import nn
 from client import Client
+from centralized import Centralized
 from datasets.femnist import Femnist
 from server import Server
 from utils.args import get_parser
@@ -113,7 +114,7 @@ def get_datasets(args):
             with open(os.path.join(root, 'train.txt'), 'r') as f:
                 train_data = f.read().splitlines()
                 train_datasets.append(IDDADataset(root=root, list_samples=train_data, transform=train_transforms,
-                                                    client_name="Unique"))
+                                                    client_name="uniqueTrain"))
             
             
         with open(os.path.join(root, 'test_same_dom.txt'), 'r') as f:
@@ -168,10 +169,22 @@ def set_metrics(args):
 
 
 def gen_clients(args, train_datasets, test_datasets, model):
-    clients = [[], []]
-    for i, datasets in enumerate([train_datasets, test_datasets]):
-        for ds in datasets:
-            clients[i].append(Client(args, ds, model, test_client=i == 1))
+    
+    if args.dataset == 'idda':
+        clients = [[], []]
+        for i, datasets in enumerate([train_datasets, test_datasets]):
+            for ds in datasets:
+                clients[i].append(Client(args, ds, model, test_client=i == 1))
+    
+    #! Ha davvero senso creare la classe centralized?
+    #! si comporta in modo così diverso del client in condizioni federate?
+    #! eventualmente eliminare tutto l'elif sotto
+    elif args.dataset == 'iddaCB':
+        clients = [[], []]
+        for i, datasets in enumerate([train_datasets, test_datasets]):
+            for ds in datasets:
+                clients[i].append(Centralized(args, ds, model, test_client=i == 1))
+
     return clients[0], clients[1]
 
 

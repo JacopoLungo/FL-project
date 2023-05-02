@@ -73,6 +73,9 @@ class Server:
         This method handles the evaluation on the train clients
         """
         # TODO: missing code here!
+        client = self.train_clients[0]
+        print(f"Testing client {client.name}...")
+        
         raise NotImplementedError
 
     def test(self):
@@ -80,4 +83,13 @@ class Server:
             This method handles the test on the test clients
         """
         # TODO: missing code here!
+
+        for client in self.test_clients:
+            print(f"Testing client {client.name}...")
+            self.load_server_model_on_client(client)
+
+
         raise NotImplementedError
+    
+    def load_server_model_on_client(self, client):
+        client.model.load_state_dict(self.model_params_dict)
