@@ -171,13 +171,14 @@ class Centralized:
         self.model.train()
         
         # Freeze parameters so we don't backprop through them.
-        for param in self.model.backbone.parameters():
-            param.requires_grad = False
+        #!for param in self.model.backbone.parameters():
+        #!    param.requires_grad = False
             
-        print('Params freezed')
+        #!print('Params freezed')
 
         # We build the effective optimizer and scheduler. We need first to create fake dictionaries to pass as argument.
-        dummy_dict = {'params': self.model.classifier.parameters()}
+        #!dummy_dict = {'params': self.model.classifier.parameters()}
+        dummy_dict = {'params': self.model.parameters()}
         opt_param = self.params['optimizer']['settings']
         dummy_dict.update(opt_param)
         self.optimizer = self.opt_method([dummy_dict])
@@ -202,7 +203,7 @@ class Centralized:
         run = wandb.init(     
                                  
           # Set the project where this run will be logged
-          project = "testing",                                # We create a project with a given name.
+          project = "testing3",                                # We create a project with a given name.
           
           # Track hyperparameters and run metadata
           config = self.params,
@@ -222,8 +223,8 @@ class Centralized:
                 
         
         print('Training finished!')
-        torch.save(self.model.classifier.state_dict(), 'modelliSalvati/checkpoint.pth')
-        print('Model saved!')
+        #!torch.save(self.model.classifier.state_dict(), 'modelliSalvati/checkpoint.pth')
+        #!print('Model saved!')
 
 
 
